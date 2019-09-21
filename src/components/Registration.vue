@@ -6,34 +6,37 @@
                 b-form-group(
                     label="Email"
                     label-for="email-input"
-                    :valid-feedback="emailValidFeedback"
                     :invalid-feedback="emailInvalidFeedback"
+                    :state="form.email.exists"
                 )
                     b-form-input(
                         type="email"
                         id="email-input"
                         v-model="form.email.value"
                         trim
-                        @blur="checkEmailExistence"
-
+                        :state="form.email.exists"
                     )
+                    b-form-invalid-feedback(v-if="form.email.exists === false") This email doesn't exist. Please enter existing email.
                 b-form-group(
                     label="Username"
                     label-for="username-input"
-                    :valid-feedback="usernameValidFeedback"
                     :invalid-feedback="usernameInvalidFeedback"
                     :state="usernameState"
                 )
                     b-form-input(
                         type="text"
                         id="username-input"
-                        v-model="form.username"
+                        v-model="form.username.value"
                         trim
                         :state="usernameState"
+                        autocomplete="off"
                     )
+                    b-form-invalid-feedback(v-if="form.username.unique === false") User with such username already exists
                 b-form-group(
                     label="Password"
                     label-for="password-input"
+                    :invalid-feedback="passwordInvalidFeedback"
+                    :state="passwordState"
                 )
                     b-form-input(
                         class=""
@@ -41,16 +44,20 @@
                         id="password-input"
                         v-model="form.password"
                         trim
+                        :state="passwordState"
                     )
                 b-form-group(
                     label="Repeat password"
                     label-for="repeat-password-input"
+                    :invalid-feedback="repeatPasswordInvalidFeedback"
+                    :state="repeatPasswordState"
                 )
                     b-form-input(
                         type="password"
                         id="repeat-password-input"
                         v-model="form.repeat_password"
                         trim
+                        :state="repeatPasswordState"
                     )
 
                 div.text-xl-center
@@ -69,66 +76,85 @@
 
 
 <script>
-    import axios from 'axios'
+    import axios from "axios"
+
+    let regular_username = /^[a-z]+\d*$/i;
 
     export default {
         data: function () {
             return {
                 form: {
-                  'email': {
-                      value: '',
-                      exists: 'unchecked'
+                  "email": {
+                      value: "",
+                      exists: null
                   },
-                  'username': '',
-                  'password': '',
-                  'repeat_password': '',
+                  "username": {
+                      value: "",
+                      unique: null
+                  },
+                  "password": "",
+                  "repeat_password": "",
                 },
-                message: '',
+                message: "",
             }
         },
         computed: {
+
+
             usernameState: function(){
-                if(this.form.username !== '' && this.form.username.length < 3){
-                    return false;
-                } else if (this.form.username.length > 2){
-                    return true;
-                } else {
+                if(this.form.username.value.length === 0){
                     return null
-                }
-            },
-            usernameValidFeedback: function(){
-                if(this.form.username.length === 0){
-                    return '';
                 } else {
-                    return this.usernameInvalidFeedback;
+                    return this.form.username.value.match(regular_username) && this.form.username.value.length > 2
                 }
             },
+
             usernameInvalidFeedback: function(){
-                if(this.form.username.length < 3){
-                    return 'Your name must consist of 3 symbols at least'
-                } else {
-                    return '';
+                if(!this.form.username.value.match(regular_username) || this.form.username.value.length < 3){
+                    return "The user name must begin with a Latin letter, " +
+                        "do not contain Cyrillic letters, special characters, " +
+                        "and its length must be no more than 30 characters.";
+                }else {
+                    return "";
                 }
             },
+
             emailInvalidFeedback: function() {
                 if(this.form.email.exists === "false"){
                     return "This email doesn't exist. Please enter existing email";
                 } else {
-                    return '';
+                    return "";
                 }
             },
-            emailValidFeedback: function () {
-                if(this.form.email.exists === "true"){
-                    return '';
+
+            passwordState: function(){
+                if(this.form.password.length === 0){
+                    return null
                 } else {
-                    return this.emailInvalidFeedback;
+                    return this.form.password.length > 7
                 }
+            },
+
+            passwordInvalidFeedback: function(){
+                return this.form.password.length > 7 ? "" : "Password must be 8 characters long."
+            },
+
+            repeatPasswordState: function () {
+                if(this.form.repeat_password.length === 0){
+                    return null
+                } else {
+                    return this.form.repeat_password === this.form.password
+                }
+            },
+            
+            repeatPasswordInvalidFeedback: function () {
+                return this.form.password === this.form.repeat_password ? "" : "Passwords don't match"
             },
         },
         methods: {
             checkEmailExistence: function () {
                 if(this.form.email.value){
-                    axios.post('http://127.0.0.1:5000/api/registration/email_existense', {
+                    axios.post("http://127.0.0.1:5000/api/registration/email_existense", {
                         value: this.form.email.value
                     })
                         .then(response => this.form.email.exists = response.data.exists)
@@ -144,8 +170,8 @@
 
 
 <style scoped lang="scss">
-    @import '~bootstrap/scss/bootstrap.scss';
-    @import '~bootstrap-vue/src/index.scss';
+    @import "~bootstrap/scss/bootstrap.scss";
+    @import "~bootstrap-vue/src/index.scss";
 
     input{
 
