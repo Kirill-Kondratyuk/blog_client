@@ -8,8 +8,8 @@ import Home from "./components/Home";
 Vue.use(VueRouter);
 
 let routers = [
-    {path: '/introvert', name: 'home', component: Home},
-    {path: '/introvert/registration', name:'registration', component: Registration}
+    {path: '/', name: 'home', component: Home},
+    {path: '/registration', name:'registration', component: Registration}
 ];
 
 

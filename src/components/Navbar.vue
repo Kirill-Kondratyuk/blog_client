@@ -11,7 +11,7 @@
             b-collapse(id="nav-collapse" is-nav)
                 b-navbar-nav(class="ml-auto")
                     b-nav-item
-                        router-link(class="sign-up-link" to="/introvert/registration")
+                        router-link(class="sign-up-link" to="/registration")
                             b-button Sign up
                     b-nav-item
                         b-button Log in

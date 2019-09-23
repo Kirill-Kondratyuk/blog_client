@@ -16,7 +16,6 @@
                         trim
                         :state="form.email.exists"
                     )
-                    b-form-invalid-feedback(v-if="form.email.exists === false") This email doesn't exist. Please enter existing email.
                 b-form-group(
                     label="Username"
                     label-for="username-input"
@@ -31,7 +30,7 @@
                         :state="usernameState"
                         autocomplete="off"
                     )
-                    b-form-invalid-feedback(v-if="form.username.unique === false") User with such username already exists
+
                 b-form-group(
                     label="Password"
                     label-for="password-input"
@@ -64,6 +63,7 @@
                     b-button(
                         type="submit"
                         variant="outline-dark"
+                        @click="submitRegistration"
                     ) Submit
                     b-button(
                         type="reset"
@@ -80,22 +80,32 @@
 
     let regular_username = /^[a-z]+\d*$/i;
 
+
     export default {
         data: function () {
             return {
                 form: {
-                  "email": {
+                  email: {
                       value: "",
                       exists: null
                   },
-                  "username": {
+                  username: {
                       value: "",
                       unique: null
                   },
-                  "password": "",
-                  "repeat_password": "",
+                  password: "",
+                  repeat_password: "",
                 },
                 message: "",
+                registration_status: {
+                    username: {
+                        allowed: true
+                    },
+                    email: {
+                        exists: true,
+                        allowed: true,
+                    }
+                }
             }
         },
         computed: {
@@ -104,18 +114,26 @@
             usernameState: function(){
                 if(this.form.username.value.length === 0){
                     return null
-                } else {
+                } else if(!this.registration_status.username.allowed){
+                    return false;
+                }else{
                     return this.form.username.value.match(regular_username) && this.form.username.value.length > 2
                 }
             },
 
             usernameInvalidFeedback: function(){
+                let unique_feedback = "There is an existing user with such username.";
+                let common_feedback = "The user name must begin with a Latin letter, " +
+                    "do not contain Cyrillic letters, special characters, " +
+                    "and its length must be no more than 30 characters.";
+                let feedback = '';
+                if(!this.registration_status.username.allowed){
+                    feedback = unique_feedback;
+                }
                 if(!this.form.username.value.match(regular_username) || this.form.username.value.length < 3){
-                    return "The user name must begin with a Latin letter, " +
-                        "do not contain Cyrillic letters, special characters, " +
-                        "and its length must be no more than 30 characters.";
+                    return feedback +'\n'+ common_feedback
                 }else {
-                    return "";
+                    return feedback;
                 }
             },
 
@@ -152,15 +170,16 @@
             },
         },
         methods: {
-            checkEmailExistence: function () {
-                if(this.form.email.value){
-                    axios.post("http://127.0.0.1:5000/api/registration/email_existense", {
-                        value: this.form.email.value
-                    })
-                        .then(response => this.form.email.exists = response.data.exists)
-                        // eslint-disable-next-line no-console
-                        .catch(error => console.log(error))
-                }
+            submitRegistration: function () {
+                axios.post("http://127.0.0.1:5000/api/registration/account", {
+                    username: this.form.username.value,
+                    email: this.form.email.value,
+                    password: this.form.password
+                })
+                    .then(response => {this.registration_status = response.data})
+                    .then()
+                    // eslint-disable-next-line no-console
+                    .catch(error => console.log(error))
             }
         },
     }
