@@ -6,14 +6,24 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        authorized: false
+        authorized: false,
+        user: {
+            username: null
+        }
     },
     mutations: {
-        entree(state) {
-            state.authorized = true
+        ENTREE(state, username) {
+            state.authorized = true;
+            state.user.username = username;
         },
-        exit(state) {
-            state.authorized = false
+        EXIT(state) {
+            state.authorized = false;
+            state.user.username = null;
+        }
+    },
+    getters: {
+        USERNAME: state => {
+            return state.user.username
         }
     },
     actions: {}

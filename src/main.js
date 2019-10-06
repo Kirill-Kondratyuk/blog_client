@@ -14,12 +14,23 @@ Vue.config.productionTip = false;
 Vue.use(BootstrapVue);
 Vue.use(Vuelidate);
 
+import {apiFactory} from "./apis/apiFactory";
+
+const auth = apiFactory.get('auth');
 
 const access_token = localStorage.getItem('access_token');
 
 if(access_token){
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-  store.commit('entree');
+  auth.getUserIdentity().then(res => {
+    store.commit('ENTREE', res.data.username);
+  }).catch(err => {
+    // eslint-disable-next-line no-console
+    console.log(err);
+    store.commit('EXIT');
+  })
+
+
 }
 
 

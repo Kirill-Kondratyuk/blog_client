@@ -73,6 +73,10 @@
 
 
 <script>
+    import axios from 'axios';
+    import {apiFactory} from "../apis/apiFactory";
+
+    const auth = apiFactory.get('auth');
 
     let regular_username = /^[a-z]+\d*$/i;
 
@@ -83,7 +87,8 @@
                 form: {
                     email: {
                         value: "",
-                        exists: null
+                        exists: null,
+                        unique: null,
                     },
                     username: {
                         value: "",
@@ -164,8 +169,34 @@
             },
         },
         methods: {
+            /**
+             *  @property res.data.access_token
+             *  @property errors.UsernameExistsError
+             *  @property errors.EmailDoesNotExistError
+             *  @property errors.UserWithSuchEmailExists
+            */
             submitRegistration: function () {
-
+                auth.createUser({
+                    email: this.form.email.value,
+                    username: this.form.username,
+                    password: this.form.password
+                }).then(res => {
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.access_token}`;
+                    localStorage.setItem('access_token', res.data.token);
+                    this.$store.commit('ENTREE', this.form.username.value);
+                    this.$router.push('/')
+                }).catch(err => {
+                    // eslint-disable-next-line no-console
+                    console.log(err);
+                    let errors = err.data.errors;
+                    if(errors.UsernameExistsError){
+                        this.form.username.unique = !errors.UsernameExistsError;
+                    } else {
+                        this.form.username.unique = true
+                    }
+                    this.form.email.exists = !errors.EmailDoesNotExistError;
+                    this.form.email.unique = !errors.UserWithSuchEmailExists;
+                });
             }
         },
     }

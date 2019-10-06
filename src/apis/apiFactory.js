@@ -1,7 +1,9 @@
-import apiPosts from "./apiPosts";
+import {postRequests, authRequests} from "./apiRequests";
+
 
 const apis = {
-    posts: apiPosts,
+    posts: postRequests,
+    auth: authRequests
 };
 
 export const apiFactory = {
