@@ -20,7 +20,9 @@ const auth = apiFactory.get('auth');
 
 const access_token = localStorage.getItem('access_token');
 
-if(access_token){
+if(access_token !== "undefined"){
+  // eslint-disable-next-line no-console
+  console.log(access_token.length);
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
   auth.getUserIdentity().then(res => {
     store.commit('ENTREE', res.data.username);
@@ -29,8 +31,8 @@ if(access_token){
     console.log(err);
     store.commit('EXIT');
   })
-
-
+} else{
+  store.commit('EXIT');
 }
 
 

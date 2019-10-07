@@ -14,16 +14,58 @@
                         router-link(class="sign-up-link" to="/registration")
                             b-button Sign up
                     b-nav-item(v-if="!$store.state.authorized")
-                        b-button Log in
-                    b-nav-item-dropdown(right)
+                        b-button(v-b-modal.login) Log in
+                    b-nav-item-dropdown(right v-if="$store.state.authorized")
                         template(v-slot:button-content)
                             em  {{$store.getters.USERNAME}}
                         b-dropdown-item(@click="logout" href="#") Sign out
 
 
-                    b-nav-item-dropdown(right v-if="user")
+                    b-nav-item-dropdown(right v-if="$store.state.authorized")
                         template(v-slot:button-content)
                             b-img(blank rounded="circle" width="48px" height="48px" blank-color="black")
+        b-modal(
+            hide-footer
+            id="login"
+            title="Log in"
+        )
+            b-form(@submit.stop.prevent)
+                b-form-group(
+                    label="Email"
+                    label-for="email-input"
+                )
+                    b-form-input(
+                        type="email"
+                        id="email-input"
+                        v-model="user.email"
+                        trim
+                    )
+
+                b-form-group(
+                    label="Password"
+                    label-for="password-input"
+                )
+                    b-form-input(
+                        class=""
+                        type="password"
+                        id="password-input"
+                        v-model="user.password"
+                        trim
+                    )
+
+                div.text-xl-center
+                    b-button(
+                        class="submit"
+                        type="submit"
+                        variant="outline-dark"
+                        @click="login"
+                    ) Submit
+                    b-button(
+                        class="reset"
+                        type="reset"
+                        variant="outline-dark"
+                        @click="resetForm"
+                    ) Reset
 
 
 </template>
@@ -36,18 +78,44 @@
     export default {
         data: function () {
             return {
-                user: null
+                user: {
+                    email: "",
+                    password: ""
+                }
             }
         },
         methods: {
             logout: function () {
                 auth.logoutAccess().then(() => {
                     this.$store.commit('EXIT');
+                    localStorage.removeItem("access_token");
+                    localStorage.removeItem("refresh_token");
+                    //TODO resolve dupicate-error
                     this.$router.push('/');
                 }).catch(err => {
                     // eslint-disable-next-line no-console
                     console.log(err)
                 })
+            },
+            resetForm: function () {
+                this.user.email = "";
+                this.user.password = "";
+            },
+
+            login: function () {
+                auth.loginUser({
+                    email: this.user.email,
+                    password: this.user.password,
+                })
+                    .then(res => {
+                        localStorage.setItem("access_token", res.data.access_token);
+                        localStorage.setItem("refresh_token", res.data.refresh_token);
+                        this.$store.commit("ENTREE", res.data.username);
+                    })
+                    .catch(err => {
+                        // eslint-disable-next-line no-console
+                        console.log(err)
+                    })
             }
         }
     }
@@ -58,5 +126,16 @@
     .sign-up-link {
         text-decoration: none;
         color: inherit;
+    }
+    button.submit{
+        margin-right: 1%;
+    }
+
+    button.reset {
+        margin-left: 1%;
+    }
+    form{
+        width: 80%;
+        margin: 0 auto;
     }
 </style>

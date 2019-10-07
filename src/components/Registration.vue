@@ -178,14 +178,15 @@
             submitRegistration: function () {
                 auth.createUser({
                     email: this.form.email.value,
-                    username: this.form.username,
+                    username: this.form.username.value,
                     password: this.form.password
-                }).then(res => {
+                })
+                    .then(res => {
                     axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.access_token}`;
-                    localStorage.setItem('access_token', res.data.token);
+                    localStorage.setItem('access_token', res.data.access_token);
                     this.$store.commit('ENTREE', this.form.username.value);
                     this.$router.push('/')
-                }).catch(err => {
+                })  .catch(err => {
                     // eslint-disable-next-line no-console
                     console.log(err);
                     let errors = err.data.errors;
@@ -194,8 +195,9 @@
                     } else {
                         this.form.username.unique = true
                     }
-                    this.form.email.exists = !errors.EmailDoesNotExistError;
-                    this.form.email.unique = !errors.UserWithSuchEmailExists;
+
+                    errors.EmailDoesNotExistError ? this.form.email.exists = false : this.form.email.exists = true;
+                    errors.UserWithSuchEmailExists ? this.form.email.unique = false : this.form.email.unique = true;
                 });
             }
         },

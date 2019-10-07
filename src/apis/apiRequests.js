@@ -3,7 +3,7 @@ import api from "./api";
 const post_resource = `posts`;
 const auth_resource = `auth`;
 
-//TODO configure axios headers
+
 
 function getPostsPage(pageSize, pageNumber) {
         return api.get(`${post_resource}/${pageSize}/${pageNumber}`)
@@ -18,7 +18,11 @@ function createUser(payload){
 }
 
 function loginUser(payload){
-    return api.post(`${auth_resource}/login`, payload)
+    return api({
+        method: 'post',
+        url: `${auth_resource}/login`,
+        data: payload,
+    })
 }
 
 function getUserIdentity(){
@@ -26,11 +30,19 @@ function getUserIdentity(){
 }
 
 function logoutAccess(){
-    return api.post(`${auth_resource}/logout/access`)
+    return api({
+        method: 'post',
+        url: `${auth_resource}/logout/access`,
+        headers: {'Authorization': `Bearer ${localStorage.getItem('access_token')}`}
+    })
 }
 
 function logoutRefresh(){
-    return api.post(`${auth_resource}/logout/refresh`)
+    return api({
+        method: 'post',
+        url: `${auth_resource}/logout/refresh`,
+        headers: {'Authorization': `Bearer ${localStorage.getItem('access_token')}`}
+    })
 }
 
 let postRequests = {
