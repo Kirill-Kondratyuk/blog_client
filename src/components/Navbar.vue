@@ -12,18 +12,15 @@
                 b-navbar-nav(class="ml-auto")
                     b-nav-item(v-if="!$store.state.authorized")
                         router-link(class="sign-up-link" to="/registration")
-                            b-button Sign up
+                            b-button(squared) Sign up
                     b-nav-item(v-if="!$store.state.authorized")
-                        b-button(v-b-modal.login) Log in
+                        b-button(v-b-modal.login squared) Log in
                     b-nav-item-dropdown(right v-if="$store.state.authorized")
                         template(v-slot:button-content)
                             em  {{$store.getters.USERNAME}}
                         b-dropdown-item(@click="logout" href="#") Sign out
 
 
-                    b-nav-item-dropdown(right v-if="$store.state.authorized")
-                        template(v-slot:button-content)
-                            b-img(blank rounded="circle" width="48px" height="48px" blank-color="black")
         b-modal(
             hide-footer
             id="login"
@@ -55,12 +52,14 @@
 
                 div.text-xl-center
                     b-button(
+                        squared
                         class="submit"
                         type="submit"
                         variant="outline-dark"
                         @click="login"
                     ) Submit
                     b-button(
+                        squared
                         class="reset"
                         type="reset"
                         variant="outline-dark"
@@ -87,14 +86,12 @@
         methods: {
             logout: function () {
                 auth.logoutAccess().then(() => {
-                    this.$store.commit('EXIT');
                     localStorage.removeItem("access_token");
-                    localStorage.removeItem("refresh_token");
+                    auth.logoutRefresh().then(() => {
+                        localStorage.removeItem("refresh_token");
+                        this.$store.commit("EXIT");
+                    });
                     //TODO resolve dupicate-error
-                    this.$router.push('/');
-                }).catch(err => {
-                    // eslint-disable-next-line no-console
-                    console.log(err)
                 })
             },
             resetForm: function () {
@@ -111,6 +108,7 @@
                         localStorage.setItem("access_token", res.data.access_token);
                         localStorage.setItem("refresh_token", res.data.refresh_token);
                         this.$store.commit("ENTREE", res.data.username);
+                        this.$bvModal.hide("login");
                     })
                     .catch(err => {
                         // eslint-disable-next-line no-console

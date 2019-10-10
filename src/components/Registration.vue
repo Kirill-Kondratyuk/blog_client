@@ -7,14 +7,14 @@
                     label="Email"
                     label-for="email-input"
                     :invalid-feedback="emailInvalidFeedback"
-                    :state="form.email.exists"
+                    :state="emailState"
                 )
                     b-form-input(
                         type="email"
                         id="email-input"
                         v-model="form.email.value"
                         trim
-                        :state="form.email.exists"
+                        :state="emailState"
                     )
                 b-form-group(
                     label="Username"
@@ -61,11 +61,14 @@
 
                 div.text-xl-center
                     b-button(
+                        squared
                         type="submit"
                         variant="outline-dark"
                         @click="submitRegistration"
+                        :disabled="submitDisabled"
                     ) Submit
                     b-button(
+                        squared
                         type="reset"
                         variant="outline-dark"
                     ) Reset
@@ -75,6 +78,7 @@
 <script>
     import axios from 'axios';
     import {apiFactory} from "../apis/apiFactory";
+    import router from "../router";
 
     const auth = apiFactory.get('auth');
 
@@ -106,10 +110,14 @@
                         exists: true,
                         allowed: true,
                     }
-                }
+                },
+                submitDisabled: false
             }
         },
         computed: {
+            emailState: function () {
+                return this.form.email.exists && this.form.email.unique
+            },
             usernameState: function () {
                 if (this.form.username.value.length === 0) {
                     return null
@@ -137,11 +145,14 @@
             },
 
             emailInvalidFeedback: function () {
-                if (this.form.email.exists === "false") {
-                    return "This email doesn't exist. Please enter existing email";
-                } else {
-                    return "";
+                let feedback = "";
+                if (this.form.email.exists === false) {
+                    feedback += "This email doesn't exist. Please enter existing email";
                 }
+                if (this.form.email.unique === false) {
+                    feedback += "User with such email already exists";
+                }
+                return feedback;
             },
 
             passwordState: function () {
@@ -174,30 +185,43 @@
              *  @property errors.UsernameExistsError
              *  @property errors.EmailDoesNotExistError
              *  @property errors.UserWithSuchEmailExists
-            */
+             *  @property res.data.refresh_token
+             */
             submitRegistration: function () {
+                this.submitDisabled = true;
                 auth.createUser({
                     email: this.form.email.value,
                     username: this.form.username.value,
                     password: this.form.password
                 })
-                    .then(res => {
-                    axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.access_token}`;
-                    localStorage.setItem('access_token', res.data.access_token);
-                    this.$store.commit('ENTREE', this.form.username.value);
-                    this.$router.push('/')
-                })  .catch(err => {
+                    .then(() => {
+                        auth.loginUser({
+                            email: this.form.email.value,
+                            password: this.form.password
+                        }).then(res => {
+                            localStorage.setItem('access_token', res.data.access_token);
+                            localStorage.setItem('refresh_token', res.data.refresh_token);
+                            this.$store.commit('ENTREE', this.form.username.value);
+                            axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.access_token}`;
+                        });
+                        router.push({name: "home"});
+                    }).catch(err => {
+                        //TODO configure error handling
                     // eslint-disable-next-line no-console
                     console.log(err);
-                    let errors = err.data.errors;
-                    if(errors.UsernameExistsError){
+                    let errors = err;
+                    if (errors.UsernameExistsError) {
                         this.form.username.unique = !errors.UsernameExistsError;
                     } else {
                         this.form.username.unique = true
                     }
-
-                    errors.EmailDoesNotExistError ? this.form.email.exists = false : this.form.email.exists = true;
-                    errors.UserWithSuchEmailExists ? this.form.email.unique = false : this.form.email.unique = true;
+                    if (errors.EmailDoesNotExistError) {
+                        this.form.email.exists = !errors.EmailDoesNotExistError
+                    }
+                    if (errors.UserWithSuchEmailExists) {
+                        this.form.email.unique = !errors.UserWithSuchEmailExists
+                    }
+                    this.submitDisabled = false;
                 });
             }
         },

@@ -1,26 +1,31 @@
 <template>
-  <div id="app">
-    <div id="main">
-      <router-view/>
+    <div id="app">
+        <div id="main">
+            <router-view/>
+        </div>
     </div>
-  </div>
 </template>
 
 <script>
 
-export default {
-  name: 'app',
-}
+    export default {
+        name: 'app',
+    }
 </script>
 
 <style>
-  #main{
-    height: 100%;
-  }
-  #app{
-    height: 100%;
-  }
-  html{
-    height: 100%;
-  }
+    input {
+        border-radius: 0;
+    }
+    #main {
+        height: 100%;
+    }
+
+    #app {
+        height: 100%;
+    }
+
+    html {
+        height: 100%;
+    }
 </style>

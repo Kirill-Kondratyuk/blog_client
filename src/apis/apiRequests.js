@@ -37,11 +37,12 @@ function logoutAccess(){
     })
 }
 
+
 function logoutRefresh(){
     return api({
         method: 'post',
         url: `${auth_resource}/logout/refresh`,
-        headers: {'Authorization': `Bearer ${localStorage.getItem('access_token')}`}
+        headers: {'Authorization': `Bearer ${localStorage.getItem('refresh_token')}`}
     })
 }
 
