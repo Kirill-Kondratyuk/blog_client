@@ -17,6 +17,8 @@ export default new Vuex.Store({
             state.user.username = username;
         },
         EXIT(state) {
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("refresh_token");
             state.authorized = false;
             state.user.username = null;
         }

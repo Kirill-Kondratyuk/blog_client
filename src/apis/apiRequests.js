@@ -26,7 +26,11 @@ function loginUser(payload){
 }
 
 function getUserIdentity(){
-    return api.get(`${auth_resource}/login`)
+    return api({
+        method: 'get',
+        url: `${auth_resource}/login`,
+        headers: {'Authorization': `Bearer ${localStorage.getItem('access_token')}`}
+    })
 }
 
 function logoutAccess(){
@@ -37,11 +41,18 @@ function logoutAccess(){
     })
 }
 
-
 function logoutRefresh(){
     return api({
         method: 'post',
         url: `${auth_resource}/logout/refresh`,
+        headers: {'Authorization': `Bearer ${localStorage.getItem('refresh_token')}`}
+    })
+}
+
+function refreshToken(){
+    return api({
+        method: 'post',
+        url: `${auth_resource}/refresh_token`,
         headers: {'Authorization': `Bearer ${localStorage.getItem('refresh_token')}`}
     })
 }
@@ -53,6 +64,7 @@ let postRequests = {
 let authRequests = {
     createUser,
     loginUser,
+    refreshToken,
     getUserIdentity,
     logoutAccess,
     logoutRefresh

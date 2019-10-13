@@ -10,6 +10,7 @@
                     :state="emailState"
                 )
                     b-form-input(
+                        autocomplete="on"
                         type="email"
                         id="email-input"
                         v-model="form.email.value"
@@ -76,7 +77,6 @@
 
 
 <script>
-    import axios from 'axios';
     import {apiFactory} from "../apis/apiFactory";
     import router from "../router";
 
@@ -116,12 +116,15 @@
         },
         computed: {
             emailState: function () {
-                return this.form.email.exists && this.form.email.unique
+                if(this.form.email.exists === false || this.form.email.unique === false){
+                    return false
+                }
+                else {return null}
             },
             usernameState: function () {
                 if (this.form.username.value.length === 0) {
                     return null
-                } else if (!this.registration_status.username.allowed) {
+                } else if (this.form.username.unique === false) {
                     return false;
                 } else {
                     return this.form.username.value.match(regular_username) && this.form.username.value.length > 2
@@ -129,19 +132,16 @@
             },
 
             usernameInvalidFeedback: function () {
-                let unique_feedback = "There is an existing user with such username.";
-                let common_feedback = "The user name must begin with a Latin letter, " +
-                    "do not contain Cyrillic letters, special characters, " +
-                    "and its length must be no more than 30 characters.";
                 let feedback = '';
-                if (!this.registration_status.username.allowed) {
-                    feedback = unique_feedback;
+                if (this.form.username.unique === false) {
+                    feedback += "There is an existing user with such username.";
                 }
                 if (!this.form.username.value.match(regular_username) || this.form.username.value.length < 3) {
-                    return feedback + '\n' + common_feedback
-                } else {
-                    return feedback;
+                    feedback += "The user name must begin with a Latin letter, " +
+                    "do not contain Cyrillic letters, special characters, " +
+                    "and its length must be no more than 30 characters.";
                 }
+                return feedback;
             },
 
             emailInvalidFeedback: function () {
@@ -202,24 +202,23 @@
                             localStorage.setItem('access_token', res.data.access_token);
                             localStorage.setItem('refresh_token', res.data.refresh_token);
                             this.$store.commit('ENTREE', this.form.username.value);
-                            axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.access_token}`;
                         });
                         router.push({name: "home"});
                     }).catch(err => {
-                        //TODO configure error handling
-                    // eslint-disable-next-line no-console
-                    console.log(err);
-                    let errors = err;
+                        console.log(err.response.data);
+                    let errors = err.response.data.errors;
                     if (errors.UsernameExistsError) {
                         this.form.username.unique = !errors.UsernameExistsError;
                     } else {
                         this.form.username.unique = true
                     }
                     if (errors.EmailDoesNotExistError) {
-                        this.form.email.exists = !errors.EmailDoesNotExistError
+                        this.form.email.exists = !errors.EmailDoesNotExistError;
+                        this.form.email.unique = true;
                     }
                     if (errors.UserWithSuchEmailExists) {
-                        this.form.email.unique = !errors.UserWithSuchEmailExists
+                        this.form.email.unique = !errors.UserWithSuchEmailExists;
+                        this.form.email.exists = true;
                     }
                     this.submitDisabled = false;
                 });
