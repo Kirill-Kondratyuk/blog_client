@@ -29,7 +29,7 @@ const ifAuthenticated = (to, from, next) => {
 let routers = [
     {path: '/', name: 'home', component: Home},
     {path: '/registration', name:'registration', component: Registration, beforeEnter: ifNotAuthenticated},
-    {path: '/new_post', name:'new_post', component: NewPost},
+    {path: '/new_post', name:'new_post', component: NewPost, beforeEnter: ifAuthenticated},
 ];
 
 

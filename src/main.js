@@ -12,6 +12,13 @@ Vue.config.productionTip = false;
 Vue.use(BootstrapVue);
 
 import {setStoreState} from "./apis/apiAuth";
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faBold, faItalic, faCut, faArrowLeft, faArrowRight, faPaste, faCode, faLink} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+library.add(faBold, faItalic, faCut, faArrowLeft, faArrowRight, faPaste, faCode, faLink);
+
+Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 setStoreState();
 
