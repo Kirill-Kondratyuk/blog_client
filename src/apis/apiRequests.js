@@ -1,16 +1,24 @@
 import api from "./api";
 
-const post_resource = `posts`;
+// const posts_resource = `posts`;
 const auth_resource = `auth`;
-
+const post_resource = 'blog/post';
 
 
 function getPostsPage(pageSize, pageNumber) {
         return api.get(`${post_resource}/${pageSize}/${pageNumber}`)
 }
 
+
+
+
 function createPost(payload){
-    return api.post(`${post_resource}`, payload)
+    return api({
+        url: `${post_resource}`,
+        method: 'post',
+        data: payload,
+        headers: {'Authorization': `Bearer ${localStorage.getItem('access_token')}`}
+    })
 }
 
 function createUser(payload){
@@ -70,4 +78,4 @@ let authRequests = {
     logoutRefresh
 };
 
-export {postRequests, authRequests};
+export {postRequests, authRequests, refreshToken};
