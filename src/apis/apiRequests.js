@@ -6,13 +6,12 @@ const post_resource = 'blog/post';
 
 
 function getPostsPage(pageSize, pageNumber) {
-        return api.get(`${post_resource}/${pageSize}/${pageNumber}`)
+    return api.get(`blog/posts/${pageSize}/${pageNumber}`)
+
 }
 
 
-
-
-function createPost(payload){
+function createPost(payload) {
     return api({
         url: `${post_resource}`,
         method: 'post',
@@ -21,11 +20,11 @@ function createPost(payload){
     })
 }
 
-function createUser(payload){
+function createUser(payload) {
     return api.post(`${auth_resource}/account`, payload)
 }
 
-function loginUser(payload){
+function loginUser(payload) {
     return api({
         method: 'post',
         url: `${auth_resource}/login`,
@@ -33,7 +32,7 @@ function loginUser(payload){
     })
 }
 
-function getUserIdentity(){
+function getUserIdentity() {
     return api({
         method: 'get',
         url: `${auth_resource}/login`,
@@ -41,7 +40,7 @@ function getUserIdentity(){
     })
 }
 
-function logoutAccess(){
+function logoutAccess() {
     return api({
         method: 'post',
         url: `${auth_resource}/logout/access`,
@@ -49,7 +48,7 @@ function logoutAccess(){
     })
 }
 
-function logoutRefresh(){
+function logoutRefresh() {
     return api({
         method: 'post',
         url: `${auth_resource}/logout/refresh`,
@@ -57,7 +56,7 @@ function logoutRefresh(){
     })
 }
 
-function refreshToken(){
+function refreshToken() {
     return api({
         method: 'post',
         url: `${auth_resource}/refresh_token`,

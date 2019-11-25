@@ -5,6 +5,7 @@ import store from "./store/store";
 import Registration from "./components/Registration";
 import Home from "./components/Home";
 import NewPost from "./components/NewPost";
+import PostPage from "./components/PostPage";
 
 Vue.use(VueRouter);
 
@@ -30,6 +31,7 @@ let routers = [
     {path: '/', name: 'home', component: Home},
     {path: '/registration', name:'registration', component: Registration, beforeEnter: ifNotAuthenticated},
     {path: '/new_post', name:'new_post', component: NewPost, beforeEnter: ifAuthenticated},
+    {path: '/post_page', name:'post_page', component: PostPage},
 ];
 
 

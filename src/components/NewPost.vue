@@ -26,7 +26,7 @@
                 b-row
                     font-awesome-icon(icon="bold")
                 b-col(cols="1")
-                        font-awesome-icon(icon="italic")
+                    font-awesome-icon(icon="italic")
                 b-row
                     b-col(cols="1")
                         font-awesome-icon(icon="cut")
@@ -53,6 +53,7 @@
 <script>
     import Navbar from "./Navbar";
     import {apiFactory} from "../apis/apiFactory";
+    import router from "../router";
 
     const apiPosts = apiFactory.get('posts');
     const auth = apiFactory.get('auth');
@@ -72,12 +73,13 @@
                     title: this.title,
                     body: this.body
                 }).catch((err) => {
-                    if(err.response.status === 401) {
-                        auth.refreshToken().then(() => {
+                    if (err.response.status === 401) {
+                        auth.refreshToken().catch().then((res) => {
+                            localStorage.setItem('access_token', res.data.access_token);
                             apiPosts.createPost({
                                 title: this.title,
                                 body: this.body
-                            })
+                            }).then(router.push({name: 'home'}))
                         })
                     }
                 })
