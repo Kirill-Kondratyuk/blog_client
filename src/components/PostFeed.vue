@@ -1,6 +1,7 @@
 <template lang="html">
     <div class="post-feed">
-        <div v-if="posts">
+        <template v-if="posts">
+            <div v-if="posts">
             <div v-if="posts">
                 <b-pagination
                         @click.native="getPage"
@@ -38,6 +39,8 @@
                 ></b-pagination>
             </div>
         </div>
+        </template>
+
     </div>
 </template>
 
@@ -57,7 +60,7 @@
         },
         methods: {
             readPost: function (post) {
-                this.$router.push({name: 'post_page', query: {post: post}})
+                this.$router.push({name: 'post_page', params: {id: post.id}})
             },
             getPage: function () {
                 postsApi.getPostsPage(10, this.currentPage).then(res => {

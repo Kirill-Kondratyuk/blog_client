@@ -31,7 +31,7 @@ let routers = [
     {path: '/', name: 'home', component: Home},
     {path: '/registration', name:'registration', component: Registration, beforeEnter: ifNotAuthenticated},
     {path: '/new_post', name:'new_post', component: NewPost, beforeEnter: ifAuthenticated},
-    {path: '/post_page', name:'post_page', component: PostPage},
+    {path: '/post_page/:id', name:'post_page', component: PostPage},
 ];
 
 
